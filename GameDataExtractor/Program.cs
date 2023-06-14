@@ -54,7 +54,7 @@ namespace GameDataExtractor
                 resaultList.Add(temporalResault);
             }
 
-            resaultList= SortResList(resaultList);
+            resaultList = SortResList(resaultList);
 
             System.IO.File.WriteAllLines(path + "\\" + (isCsvInput ? "resaultOfCounting.csv" : "resaultOfCounting.txt"), resaultList);
             Console.WriteLine("Done !!!");
@@ -62,7 +62,7 @@ namespace GameDataExtractor
 
         }
 
-        private static List<string> SortResList(  List<string> resaultList)
+        private static List<string> SortResList(List<string> resaultList)
         {
             var userList = new List<string>() { "u_nader", "u_12", "u_parvaneh1000p", "u_Adel 542", "u_SoroushRefVaraste", "u_MinaRefArya", "u_Neda60", "u_Mohamad3444", "u_samira1234", "u_maryamnouri", "u_kiaresh7", "u_mahvash", "u_leilaabbasi", "u_Mitra cheraghi", "u_nasrin", "u_seamorgh", "u_SinaRefArya", "u_Alireza_elyasi", "u_marya", "u_AryaVaraste", "u_59", "u_60", "u_61", "u_64", "u_63", "u_62", "u_13", "u_4", "u_5", "u_7", "u_11", "u_3", "u_50", "u_17", "u_40", "u_30", "u_20", "u_asalbahri", "u_REZA AZIZIAN", "u_Hadiseh Mohebbi", "u_Manieh sarani", "u_zeinab asgari", "u_Negin Miri", "u_samira zaim", "u_asal", "u_setayesh", "u_fereshte.jani", "u_narges", "u_mena afshar", "u_zahra heydari", "u_sepideh_hydrpoor", "u_hasti.shirazian", "u_mohadse aliyari", "u_mohadese zamani", "u_nadia mohamadi", "u_zahra najafi", "u_zeinab yousefi", "u_elmira shokriyan fard", "u_maedeh doabi", "u_Mohadese gholami", "u_Mahsa Hamidi", "u_fateme", "u_elahe.gharbaghi", "u_fatima", "u_Hanieh bavandpur", "u_Zahra lotfi", "u_Mahdiye Khalilzade", "u_Mobina ghasemloo", "u_elaheh", "u_amirali", "u_Barbod Gholizadeh", "u_amirali yarloo", "u_Arman Farsa", "u_Arya Nemati", "u_omid reza ghorbani", "u_Arsam Mirzaei", "u_hiva hoorbod", "u_Taha Tahmaseb poor", "u_amir pasha shokouhi", "u_miremad", "u_Arshia soroush", "u_Kasra Moafi Moafi", "u_kasrairanshahi", "u_Matin badiee", "u_samkhaftani", "u_amir hosin", "u_JDMBOI", "u_Amirali Partovi", "u_Amir Arman Bayat", "u_alijaxy", "u_faraz khalili", "u_alitamjidzad", "u_Kasra Shahrisvand", "u_sadrashariati", "u_Sepanta Behzadi", "u_Sina Bozorgmehr", "u_Korosh zolgadr", "u_Arsham Rostami", "u_Iliya heidary", "u_AmirParsa Zamani Fakhar", "u_pouria razavifard", "u_toral derakhshi", "u_sepehr  bozorgmehr", "u_Ali rangbar", "u_Ashkan sohrabi", "u_Mahbod Rahmany", "u_SSgumS", "u_patrick", "u_hossein rahimi", "u_A-Mehdi Gomar", "u_mhmdltf", "u_mh_ak", "u_Mari", "u_Momo", "u_hadi foroughi", "u_ghghgh", "u_Marzieh Alidadi", "u_Hosein Shendabadi", "u_m reza a", "u_pooya fekri", "u_Sarah Attar", "u_amir amin", "u_amirhossein sheikholeslam", "u_zahra r", "u_mohamad003", "u_mostafa masumi", "u_aaaa", "u_Mrick", "u_Medivh", "u_arsd", "u_Mohammad Naseri", "u_Hosein", "u_cyberdon", "u_mh_eb5", "u_ahmadbat" };
             var FinalList = new List<string>();
@@ -70,7 +70,7 @@ namespace GameDataExtractor
 
             foreach (var user in userList)
             {
-                FinalList.Add(resaultList.First(x => x.ToLower().Contains((user+".x").ToLower())));
+                FinalList.Add(resaultList.First(x => x.ToLower().Contains((user + ".x").ToLower())));
             }
             return FinalList;
         }
@@ -119,12 +119,13 @@ namespace GameDataExtractor
         private static string MoveLRCalculator(bool isCsvInput, List<string> countableFeachers, List<string> keyValueFeachers, List<List<string>> listWordFeatchers, string temporalResault, string[] refinedText)
         {
 
-            var moveList = refinedText.Where(x => x.Contains("location : ^loc^")).Select(x => {
+            var moveList = refinedText.Where(x => x.Contains("location : ^loc^")).Select(x =>
+            {
                 var newX = x.Replace("whathappend:", "").Trim().Replace("location : ^loc^(x=", "");
                 int index = newX.Contains("y=") ? newX.IndexOf("y=") : newX.IndexOf("-=");
 
-                return newX.Substring(0, index).Replace("/",".");
-            }).Where(x=>double.TryParse(x,out _)).Select(x=> (int)(double.Parse(x)*10)).ToList();
+                return newX.Substring(0, index).Replace("/", ".");
+            }).Where(x => double.TryParse(x, out _)).Select(x => (int)(double.Parse(x) * 10)).ToList();
 
             var res = moveList.Select((elem, index) =>
             {
@@ -150,8 +151,8 @@ namespace GameDataExtractor
             var countLeftMove = res.Count(x => x == "L");
             var countRightMove = res.Count(x => x == "R");
 
-            temporalResault += isCsvInput ? (countLeftMove + ","+ countRightMove + ","+ (countLeftMove+ countRightMove) + ",") : 
-                "number of Left Move : " + countLeftMove + "\n" + "number of Right Move : " + countRightMove + "\n" + "number of Move : " + (countLeftMove+countRightMove) + "\n";
+            temporalResault += isCsvInput ? (countLeftMove + "," + countRightMove + "," + (countLeftMove + countRightMove) + ",") :
+                "number of Left Move : " + countLeftMove + "\n" + "number of Right Move : " + countRightMove + "\n" + "number of Move : " + (countLeftMove + countRightMove) + "\n";
 
             return temporalResault;
         }
