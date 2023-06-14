@@ -11,12 +11,29 @@ namespace GameDataExtractor
     {
         static void Main(string[] args)
         {
+            /*------------------------------------------------------------------------------------------------------*/
+            /*########################################## initial variable ##########################################*/
+            /*------------------------------------------------------------------------------------------------------*/
             string path = @"I:\مقاله\مقاله 2\data of game";
             bool isCsvInput = true;
+            int inputNumber = 2;
+            MethoudToRun methoudToRun = MethoudToRun.FileSize;
+            /*------------------------------------------------------------------------------------------------------*/
+            /*########################################## initial variable ##########################################*/
+            /*------------------------------------------------------------------------------------------------------*/
             List<string> countableFeachers, keyValueFeachers;
             List<List<string>> listWordFeatchers;
-            //  Input1(out countableFeachers, out keyValueFeachers, out listWordFeatchers);
-            Input2(out countableFeachers, out keyValueFeachers, out listWordFeatchers);
+            switch (inputNumber)
+            {
+                case 1:
+                    Input1(out countableFeachers, out keyValueFeachers, out listWordFeatchers);
+                    break;
+                case 2:
+                    Input2(out countableFeachers, out keyValueFeachers, out listWordFeatchers);
+                    break;
+                default:
+                    throw new IndexOutOfRangeException();
+            }
 
             List<string> resaultList = new List<string>();
 
@@ -38,12 +55,26 @@ namespace GameDataExtractor
                 string fileText = File.ReadAllText(file).ToLower();
                 var refinedText = fileText.Replace("\"", "").Replace("{", "").Replace("}", "").Replace(", y", "-").Split(new char[] { ',' });
 
-                temporalResault = MoveLRCalculator(isCsvInput, countableFeachers, keyValueFeachers, listWordFeatchers, temporalResault, refinedText);
-                //temporalResault = Main(isCsvInput, countableFeachers, keyValueFeachers, listWordFeatchers, temporalResault, refinedText);
-                //temporalResault = FileSize(file, temporalResault);
-
-                //TimeCalculator();
-                //temporalResault = MaxScoreFinder(isCsvInput, temporalResault, refinedText);
+                switch (methoudToRun)
+                {
+                    case MethoudToRun.MoveLRCalculator:
+                        temporalResault = MoveLRCalculator(isCsvInput, countableFeachers, keyValueFeachers, listWordFeatchers, temporalResault, refinedText);
+                        break;
+                    case MethoudToRun.Main:
+                        temporalResault = Main(isCsvInput, countableFeachers, keyValueFeachers, listWordFeatchers, temporalResault, refinedText);
+                        break;
+                    case MethoudToRun.FileSize:
+                        temporalResault = FileSize(file, temporalResault);
+                        break;
+                    case MethoudToRun.TimeCalculator:
+                        TimeCalculator();
+                        break;
+                    case MethoudToRun.MaxScoreFinder:
+                        temporalResault = MaxScoreFinder(isCsvInput, temporalResault, refinedText);
+                        break;
+                    default:
+                        throw new IndexOutOfRangeException();
+                }
 
                 if (isCsvInput && temporalResault[temporalResault.Length - 1] == ',')
                     temporalResault = temporalResault.Substring(0, temporalResault.Length - 1);
@@ -268,5 +299,13 @@ namespace GameDataExtractor
                 new List<string>() { "object go out", "Enemy" }.ConvertAll(d => d.ToLower()),
                 new List<string>() { "object go out", "Powerup" }.ConvertAll(d => d.ToLower())};
         }
+    }
+    public enum MethoudToRun
+    {
+        FileSize,
+        Main,
+        MoveLRCalculator,
+        TimeCalculator,
+        MaxScoreFinder
     }
 }
