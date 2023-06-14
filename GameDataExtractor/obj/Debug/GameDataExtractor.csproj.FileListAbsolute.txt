@@ -1,0 +1,7 @@
+C:\Users\ElyosCaesar\source\repos\GameDataExtractor\GameDataExtractor\obj\Debug\GameDataExtractor.csprojAssemblyReference.cache
+C:\Users\ElyosCaesar\source\repos\GameDataExtractor\GameDataExtractor\obj\Debug\GameDataExtractor.csproj.CoreCompileInputs.cache
+C:\Users\ElyosCaesar\source\repos\GameDataExtractor\GameDataExtractor\bin\Debug\GameDataExtractor.exe.config
+C:\Users\ElyosCaesar\source\repos\GameDataExtractor\GameDataExtractor\bin\Debug\GameDataExtractor.exe
+C:\Users\ElyosCaesar\source\repos\GameDataExtractor\GameDataExtractor\bin\Debug\GameDataExtractor.pdb
+C:\Users\ElyosCaesar\source\repos\GameDataExtractor\GameDataExtractor\obj\Debug\GameDataExtractor.exe
+C:\Users\ElyosCaesar\source\repos\GameDataExtractor\GameDataExtractor\obj\Debug\GameDataExtractor.pdb
