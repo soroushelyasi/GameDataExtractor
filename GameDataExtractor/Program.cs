@@ -131,7 +131,7 @@ namespace GameDataExtractor
             {
                 if (index == 0)
                 {
-                    return "S";//steady
+                    return "S";
                 }
 
                 if (elem == moveList[index - 1])
