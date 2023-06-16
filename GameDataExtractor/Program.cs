@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace GameDataExtractor
@@ -17,7 +19,7 @@ namespace GameDataExtractor
             string path = @"I:\مقاله\مقاله 2\data of game";
             bool isCsvInput = true;
             int inputNumber = 2;
-            MethoudToRun methoudToRun = MethoudToRun.FileSize;
+            MethoudToRun methoudToRun = MethoudToRun.RecordBasedFutureExtractor;
             /*------------------------------------------------------------------------------------------------------*/
             /*########################################## initial variable ##########################################*/
             /*------------------------------------------------------------------------------------------------------*/
@@ -53,14 +55,16 @@ namespace GameDataExtractor
                 string fileNameLower = file.ToLower();
                 temporalResault = BasicInfo(file, temporalResault, fileNameLower, isCsvInput);
                 string fileText = File.ReadAllText(file).ToLower();
-                var refinedText = fileText.Replace("\"", "").Replace("{", "").Replace("}", "").Replace(", y", "-").Split(new char[] { ',' });
+                string[] refinedText;
 
                 switch (methoudToRun)
                 {
                     case MethoudToRun.MoveLRCalculator:
-                        temporalResault = MoveLRCalculator(isCsvInput, countableFeachers, keyValueFeachers, listWordFeatchers, temporalResault, refinedText);
+                        refinedText = Refiner(fileText, methoudToRun);
+                        temporalResault = MoveLRCalculator(isCsvInput, temporalResault, refinedText);
                         break;
                     case MethoudToRun.Main:
+                        refinedText = Refiner(fileText, methoudToRun);
                         temporalResault = Main(isCsvInput, countableFeachers, keyValueFeachers, listWordFeatchers, temporalResault, refinedText);
                         break;
                     case MethoudToRun.FileSize:
@@ -70,7 +74,11 @@ namespace GameDataExtractor
                         TimeCalculator();
                         break;
                     case MethoudToRun.MaxScoreFinder:
+                        refinedText = Refiner(fileText, methoudToRun);
                         temporalResault = MaxScoreFinder(isCsvInput, temporalResault, refinedText);
+                        break;
+                    case MethoudToRun.RecordBasedFutureExtractor:
+                        temporalResault = RecordBasedFutureExtractor(isCsvInput, temporalResault, fileText);
                         break;
                     default:
                         throw new IndexOutOfRangeException();
@@ -91,6 +99,118 @@ namespace GameDataExtractor
             Console.WriteLine("Done !!!");
             Console.ReadKey();
 
+        }
+
+        private static string RecordBasedFutureExtractor(bool isCsvInput, string temporalResault, string fileText)
+        {
+
+            var listWordFromTos = new List<List<string>>() {
+                new List<string>() { "preTuterial DoorLock1", "preTuterial Matching" }.ConvertAll(d => d.ToLower()),
+                new List<string>() { "preTuterial Matching", "preTuterial GalexyShooter" }.ConvertAll(d => d.ToLower()),
+                new List<string>() { "preTuterial GalexyShooter", "preTuterial DoorLock2" }.ConvertAll(d => d.ToLower()),
+                new List<string>() { "preTuterial DoorLock2", "preTuterial Hack" }.ConvertAll(d => d.ToLower()),
+                new List<string>() { "preTuterial Hack", "Finish Page" }.ConvertAll(d => d.ToLower())};
+
+            foreach (var listWordFromTo in listWordFromTos)
+            {
+                var text = fileText.Substring(fileText.IndexOf(listWordFromTo[0]), fileText.IndexOf(listWordFromTo[1]) - fileText.IndexOf(listWordFromTo[0]));
+                var refinedText = Refiner(text, MethoudToRun.RecordBasedFutureExtractor);
+                var count = refinedText.Count();
+
+                DateTime timeStart = new DateTime(), timeFinish = new DateTime();
+                double totalMinuts;
+                Regex rx = new Regex(@"\d{1,2}\/\d{1,2}\/\d{4}\s\d{1,2}\:\d{1,2}\:\d{1,22}");
+                Match m = rx.Match(refinedText[1]);
+                if (m.Success)
+                {
+                    try
+                    {
+                        timeStart = DateTime.ParseExact(m.Value.Trim(), "M/d/yyyy hh:mm:ss", CultureInfo.InvariantCulture);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex.Message.Equals("String was not recognized as a valid DateTime."))
+                            try
+                            {
+                                timeStart = DateTime.ParseExact(m.Value.Trim(), "M/d/yyyy h:mm:ss", CultureInfo.InvariantCulture);
+                            }
+                            catch (Exception ex2)
+                            {
+                                try
+                                {
+                                    timeStart = DateTime.ParseExact(m.Value.Trim(), "d/M/yyyy h:mm:ss", CultureInfo.InvariantCulture);
+                                }
+                                catch (Exception ex3)
+                                {
+                                    var temph = int.Parse(m.Value.Trim().Substring(m.Value.Trim().IndexOf(':') - 2, 2));
+                                    var newtime = m.Value.Replace(temph + ":", (temph - 12) + ":").Trim();
+                                    timeStart = DateTime.ParseExact(newtime, "d/M/yyyy h:mm:ss", CultureInfo.InvariantCulture);
+                                }
+                            }
+                        else if (ex.Message.Equals("The DateTime represented by the string is not supported in calendar System.Globalization.GregorianCalendar."))
+                            timeStart = DateTime.ParseExact(m.Value.Trim(), "d/M/yyyy hh:mm:ss", CultureInfo.InvariantCulture);
+                        else
+                            throw ex;
+                    }
+                }
+                m = rx.Match(refinedText[refinedText.Length - 1]);
+                if (m.Success)
+                {
+                    try
+                    {
+                        timeFinish = DateTime.ParseExact(m.Value.Trim(), "M/d/yyyy hh:mm:ss", CultureInfo.InvariantCulture);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (ex.Message.Equals("String was not recognized as a valid DateTime."))
+                            try
+                            {
+                                timeFinish = DateTime.ParseExact(m.Value.Trim(), "M/d/yyyy h:mm:ss", CultureInfo.InvariantCulture);
+                            }
+                            catch (Exception ex2)
+                            {
+                                try
+                                {
+                                    timeFinish = DateTime.ParseExact(m.Value.Trim(), "d/M/yyyy h:mm:ss", CultureInfo.InvariantCulture);
+                                }
+                                catch (Exception ex3)
+                                {
+                                    var temph = int.Parse(m.Value.Trim().Substring(m.Value.Trim().IndexOf(':') - 2, 2));
+                                    var newtime = m.Value.Replace(temph + ":", (temph - 12) + ":").Trim();
+                                    timeFinish = DateTime.ParseExact(newtime, "d/M/yyyy h:mm:ss", CultureInfo.InvariantCulture);
+                                }
+                            }
+                        else if (ex.Message.Equals("The DateTime represented by the string is not supported in calendar System.Globalization.GregorianCalendar."))
+                            timeFinish = DateTime.ParseExact(m.Value.Trim(), "d/M/yyyy hh:mm:ss", CultureInfo.InvariantCulture);
+                        else
+                            throw ex;
+                    }
+                }
+                totalMinuts = ((timeFinish - timeStart).TotalMinutes);
+                if (totalMinuts < 0)
+                    totalMinuts = ((new DateTime(timeFinish.Year, timeFinish.Month, timeFinish.Day, 12, 0, 0) - timeFinish).TotalMinutes) + ((new DateTime(timeFinish.Year, timeFinish.Month, timeFinish.Day, 12, 0, 0) - timeFinish).TotalMinutes);
+
+                temporalResault += isCsvInput ? count + "," + totalMinuts + "," : "number of log " + String.Join("|", listWordFromTo) + " : " + count + "\n" + "number of Minurtes " + String.Join("|", listWordFromTo) + " : " + totalMinuts + "\n";
+            }
+
+            return temporalResault;
+        }
+
+        private static string[] Refiner(string fileText, MethoudToRun methoudToRun)
+        {
+            switch (methoudToRun)
+            {
+                case MethoudToRun.FileSize:
+                case MethoudToRun.Main:
+                case MethoudToRun.MaxScoreFinder:
+                case MethoudToRun.MoveLRCalculator:
+                case MethoudToRun.TimeCalculator:
+                    return fileText.Replace("\"", "").Replace("{", "").Replace("}", "").Replace(", y", "-").Split(new char[] { ',' });
+                case MethoudToRun.RecordBasedFutureExtractor:
+                    return fileText.Replace("{", "").Split(new char[] { '}' });
+                default:
+                    throw new IndexOutOfRangeException();
+            }
         }
 
         private static List<string> SortResList(List<string> resaultList)
@@ -147,7 +267,7 @@ namespace GameDataExtractor
             return temporalResault;
         }
 
-        private static string MoveLRCalculator(bool isCsvInput, List<string> countableFeachers, List<string> keyValueFeachers, List<List<string>> listWordFeatchers, string temporalResault, string[] refinedText)
+        private static string MoveLRCalculator(bool isCsvInput, string temporalResault, string[] refinedText)
         {
 
             var moveList = refinedText.Where(x => x.Contains("location : ^loc^")).Select(x =>
@@ -299,6 +419,19 @@ namespace GameDataExtractor
                 new List<string>() { "object go out", "Enemy" }.ConvertAll(d => d.ToLower()),
                 new List<string>() { "object go out", "Powerup" }.ConvertAll(d => d.ToLower())};
         }
+
+        private static void Input3(out List<string> countableFeachers)
+        {
+            countableFeachers = new List<string>() {
+            "preTuterial DoorLock1 to preTuterial Matching logs number" ,
+            "preTuterial GalexyShooter to preTuterial DoorLock2 logs number" ,
+            "preTuterial DoorLock2 to preTuterial Hack logs number" ,
+            "preTuterial Hack to preTuterial Matching Finish Page logs number" ,
+            "preTuterial DoorLock1 to preTuterial Matching duration" ,
+            "preTuterial GalexyShooter to preTuterial DoorLock2 duration" ,
+            "preTuterial DoorLock2 to preTuterial Hack duration" ,
+            "preTuterial Hack to preTuterial Matching Finish Page duration" }.ConvertAll(d => d.ToLower());
+        }
     }
     public enum MethoudToRun
     {
@@ -306,6 +439,7 @@ namespace GameDataExtractor
         Main,
         MoveLRCalculator,
         TimeCalculator,
-        MaxScoreFinder
+        MaxScoreFinder,
+        RecordBasedFutureExtractor
     }
 }
